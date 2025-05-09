@@ -8,8 +8,10 @@ import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 import com.rak.booking.client.EventClient;
+import com.rak.booking.client.NotificationClient;
 import com.rak.booking.client.UserClient;
 import com.rak.booking.model.Booking;
+import com.rak.booking.model.NotificationDto;
 import com.rak.booking.repository.BookingRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,10 @@ public class BookingService {
 	private final BookingRepository repo;
 	private final UserClient userClient;
 	private final EventClient eventClient;
+	private final NotificationClient notificationClient;
+	
 
-	public Booking book(Long userId, Long eventId, int seats) {
+	public Booking bookTicket(Long userId, Long eventId, int seats) {
 		log.info("Processing booking for user {} for event {} ({} seats)", userId, eventId, seats);
 
 		try {
@@ -32,6 +36,7 @@ public class BookingService {
 			
 			int available = eventClient.getAvailableSeats(eventId);
 			if (available < seats) {
+				log.info("Seats are not available");
 				throw new IllegalArgumentException("Not enough seats available.");
 			}
 
@@ -49,18 +54,27 @@ public class BookingService {
 		}
 	}
 
-	public Booking get(Long id) {
+	public Booking getTicketDetails(Long id) {
 		return repo.findById(id).orElseThrow(() -> new NoSuchElementException("Booking not found"));
 	}
 
-	public List<Booking> getByUser(Long userId) {
+	public List<Booking> getByUserId(Long userId) {
 		return repo.findByUserId(userId);
 	}
 
 	public void cancel(Long id) {
-		Booking b = get(id);
-		log.warn("Cancelling booking ID: {}", id);
-		repo.delete(b);
-		// Optional: reverse booked seats via event service
+		Booking booking = getTicketDetails(id);
+		log.warn("Cancelling booking ID: {} and initiating notification", id);
+		
+		
+		repo.delete(booking);	
+		
+		NotificationDto dto = NotificationDto.builder()
+		        .userId(booking.getUserId())
+		        .eventId(booking.getEventId())
+		        .type("CANCELLATION")
+		        .build();
+
+		    notificationClient.send(dto);
 	}
 }

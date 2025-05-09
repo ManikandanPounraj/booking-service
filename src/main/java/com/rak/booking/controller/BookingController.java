@@ -30,19 +30,19 @@ public class BookingController {
 	@Operation(summary = "Book tickets", description = "Books tickets after checking user validity and seat availability")
 	public ResponseEntity<Booking> book(@RequestParam Long userId, @RequestParam Long eventId,
 			@RequestParam int seats) {
-		return ResponseEntity.ok(service.book(userId, eventId, seats));
+		return ResponseEntity.ok(service.bookTicket(userId, eventId, seats));
 	}
 
 	@GetMapping("/{id}")
 	@Operation(summary = "Get booking by ID")
 	public ResponseEntity<Booking> get(@PathVariable Long id) {
-		return ResponseEntity.ok(service.get(id));
+		return ResponseEntity.ok(service.getTicketDetails(id));
 	}
 
 	@GetMapping("/user/{userId}")
 	@Operation(summary = "Get bookings by user")
 	public ResponseEntity<List<Booking>> getByUser(@PathVariable Long userId) {
-		return ResponseEntity.ok(service.getByUser(userId));
+		return ResponseEntity.ok(service.getByUserId(userId));
 	}
 
 	@DeleteMapping("/{id}")

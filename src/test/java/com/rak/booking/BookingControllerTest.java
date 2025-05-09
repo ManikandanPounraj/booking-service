@@ -37,7 +37,7 @@ class BookingControllerTest {
                 .bookingTime(LocalDateTime.now())
                 .build();
 
-        when(bookingService.book(1L, 2L, 2)).thenReturn(booking);
+        when(bookingService.bookTicket(1L, 2L, 2)).thenReturn(booking);
 
         ResponseEntity<Booking> response = bookingController.book(1L, 2L, 2);
         assertEquals(200, response.getStatusCodeValue());
@@ -47,7 +47,7 @@ class BookingControllerTest {
     @Test
     void testGetBookingById_Found() {
         Booking booking = Booking.builder().id(1L).userId(1L).build();
-        when(bookingService.get(1L)).thenReturn(booking);
+        when(bookingService.getTicketDetails(1L)).thenReturn(booking);
 
         ResponseEntity<Booking> response = bookingController.get(1L);
         assertEquals(1L, response.getBody().getUserId());
@@ -55,7 +55,7 @@ class BookingControllerTest {
 
     @Test
     void testGetBookingById_NotFound() {
-        when(bookingService.get(999L)).thenThrow(new NoSuchElementException("Not found"));
+        when(bookingService.getTicketDetails(999L)).thenThrow(new NoSuchElementException("Not found"));
         assertThrows(NoSuchElementException.class, () -> bookingController.get(999L));
     }
 
@@ -66,7 +66,7 @@ class BookingControllerTest {
             Booking.builder().id(2L).userId(1L).build()
         );
 
-        when(bookingService.getByUser(1L)).thenReturn(bookings);
+        when(bookingService.getByUserId(1L)).thenReturn(bookings);
 
         ResponseEntity<List<Booking>> response = bookingController.getByUser(1L);
         assertEquals(2, response.getBody().size());
