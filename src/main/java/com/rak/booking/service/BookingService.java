@@ -44,7 +44,7 @@ public class BookingService {
 					.bookingTime(LocalDateTime.now()).build();
 
 			Booking saved = repo.save(booking);
-			eventClient.updateBookedSeats(eventId, Map.of("bookedSeats", available - seats));
+			eventClient.updateBookedSeats(eventId, Map.of("bookedSeats", seats));
 
 			log.info("Booking confirmed with ID: {}", saved.getId());
 			return saved;
@@ -64,9 +64,10 @@ public class BookingService {
 
 	public void cancel(Long id) {
 		Booking booking = getTicketDetails(id);
-		log.warn("Cancelling booking ID: {} and initiating notification", id);
+		log.warn("Cancelling booking ID: {} and updating the seats", id);
 		
-		
+		eventClient.updateBookedSeats(booking.getEventId(),
+			        Map.of("bookedSeats", -booking.getNumberOfSeats()));
 		repo.delete(booking);	
 		
 		NotificationDto dto = NotificationDto.builder()
